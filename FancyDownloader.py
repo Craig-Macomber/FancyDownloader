@@ -15,7 +15,7 @@
 #          (Note that this does not deal with deleted .xml files or deleted attached files.  This fairly cheap to check, so it might be a useful enhancement.)
 #    The final step is to look for local .txt files which are not on the wiki.  These will typically be files which have been deleted on the wiki.  They are deleted locally.
 
-# The wiki to be synched and the credentials are stoed in a file url.txt.  It contains a single line of text of the form:
+# The wiki to be synched and the credentials are stored in a file url.txt.  It contains a single line of text of the form:
 #      https://fancyclopedia:rdS...80g@www.wikidot.com/xml-rpc-api.php
 # where 'fancyclopedia' is the wiki and 'rdS...80g' is the access key
 
@@ -34,6 +34,12 @@ import urllib.request
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
+
+#-----------------------------------------
+# Configuration. Edit this section to select your wikidot site.
+siteName = "fancyclopedia"
+siteUrl = "http://fancyclopedia.org"
+
 
 
 #-----------------------------------------
@@ -90,7 +96,7 @@ def DownloadPage(url, pageName, skipIfNotNewer):
         wikiName=pageName.replace("_", ":", 1)  # The '_' is used in  place of Wikidot's ':' in page names in non-default namespaces. Convert back to the ":" form for downloading)
         if wikiName == "con-": # "con" is a special case since that is a reserved word in Windows and may not be used as a filename.  We use "con-" which is not a possible wiki name, for the local name .
             wikiName="con"
-        pageData=client.ServerProxy(url).pages.get_one({"site" : "fancyclopedia", "page" : wikiName})
+        pageData=client.ServerProxy(url).pages.get_one({"site" : siteName, "page" : wikiName})
     except:
         print("****Failure downloading "+pageName)
         return False # Its safest on download failure to return that nothing changed
@@ -134,7 +140,7 @@ def DownloadPage(url, pageName, skipIfNotNewer):
     # If any exist, save them in a directory named <pageName>
     # If none exist, don't create the directory
     # Note that this code does not delete the directory when previously-existing files have been deleted from the wiki page
-    fileNameList=client.ServerProxy(url).files.select({"site": "fancyclopedia", "page": wikiName})
+    fileNameList=client.ServerProxy(url).files.select({"site": siteName, "page": wikiName})
     downloadFailures=[]
     if len(fileNameList) > 0:
         if not os.path.exists(pageName):
@@ -142,7 +148,7 @@ def DownloadPage(url, pageName, skipIfNotNewer):
             os.chmod(pageName, 0o777)
         for fileName in fileNameList:
             try:
-                fileStuff = client.ServerProxy(url).files.get_one({"site": "fancyclopedia", "page": wikiName, "file": fileName})    # Download the file's content and metadata
+                fileStuff = client.ServerProxy(url).files.get_one({"site": siteName, "page": wikiName, "file": fileName})    # Download the file's content and metadata
             except client.Fault:
                 print("**** client.Fault loading "+fileName+". The file is probably too big.")
                 downloadFailures.append(fileName)
@@ -163,7 +169,7 @@ def DownloadPage(url, pageName, skipIfNotNewer):
         # Instantiate the web browser Selenium will use. For now, we're opening it anew each time.
         browser=webdriver.Firefox()
         # Open the Fancy 3 page in the browser
-        browser.get("http://fancyclopedia.org/"+pageName+"/noredirect/t")
+        browser.get(siteUrl+"/"+pageName+"/noredirect/t")
         elem=browser.find_element_by_id('files-button')
         elem.send_keys(Keys.RETURN)
         time.sleep(0.7)  # Just-in-case
@@ -178,7 +184,7 @@ def DownloadPage(url, pageName, skipIfNotNewer):
             h=els[i].get_attribute("outerHTML")
             url, linktext=GetHrefAndTextFromString(h)
             if linktext in downloadFailures:
-                urllib.request.urlretrieve("http://fancyclopedia.org"+url, os.path.join(pageName, linktext))
+                urllib.request.urlretrieve(siteUrl+url, os.path.join(pageName, linktext))
                 print("     downloading big file "+linktext)
         browser.close()
 
@@ -227,7 +233,7 @@ url=open("url.txt").read()
 
 # Change the working directory to the destination of the downloaded wiki
 cwd=os.getcwd()
-path=os.path.join(cwd, "..\\site")
+path=os.path.join(cwd, "../site")
 os.chdir(path)
 os.chmod(path, 0o777)
 del cwd, path
@@ -255,7 +261,7 @@ if os.path.exists("../FancyDownloader/override.txt"):
 # Now, get list of recently modified pages.  It will be ordered from most-recently-updated to least.
 # (We're using composition, here.)
 print("Get list of all pages from Wikidot, sorted from most- to least-recently-updated")
-listOfAllWikiPages=client.ServerProxy(url).pages.select({"site" : "fancyclopedia", "order": "updated_at desc"})
+listOfAllWikiPages=client.ServerProxy(url).pages.select({"site" : siteName, "order": "updated_at desc"})
 listOfAllWikiPages=[name.replace(":", "_", 1) for name in listOfAllWikiPages]   # ':' is used for non-standard namespaces on wiki. Replace the first ":" with "_" in all page names because ':' is invalid in Windows file names
 listOfAllWikiPages=[name if name != "con" else "con-" for name in listOfAllWikiPages]   # Handle the "con" special case
 
