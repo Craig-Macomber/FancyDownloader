@@ -15,8 +15,6 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--site', help='name of wikidot site')
 args = parser.parse_args()
 
-#-----------------------------------------
-# Configuration. Edit this section to select your wikidot site.
 siteName = args.site
 
 #-----------------------------------------
@@ -118,38 +116,19 @@ def DownloadPage(url, pageName, skipIfNotNewer):
     # If none exist, don't create the directory
     # Note that this code does not delete the directory when previously-existing files have been deleted from the wiki page
     fileNameList=client.ServerProxy(url).files.select({"site": siteName, "page": wikiName})
-    downloadFailures=[]
     if len(fileNameList) > 0:
         if not os.path.exists(pageName):
             os.mkdir(pageName)   # Create a directory for the files and metadata
             os.chmod(pageName, 0o777)
         for fileName in fileNameList:
-            try:
-                fileStuff = client.ServerProxy(url).files.get_one({"site": siteName, "page": wikiName, "file": fileName})    # Download the file's content and metadata
-            except client.Fault:
-                print("**** client.Fault loading "+fileName+". The file is probably too big. Will download via wdfiles.")
-                downloadFailures.append(fileName)
-                continue
+            # Use get_meta instead of get_one since it supports files over 6mb. See http://www.wikidot.com/doc:api
+            filesStuff = client.ServerProxy(url).files.get_meta({"site": siteName, "page": wikiName, "files": [fileName]})
+            fileStuff = filesStuff[fileName]
             path=os.path.join(os.getcwd(), pageName, fileName)
-            content=base64.b64decode(fileStuff["content"])
-            with open(path, "wb+") as file:
-                file.write(content)     # Save the content as a file
-
             # Now save the file's metadata in an xml file named for the file
-            del fileStuff["content"]    # We don't want to store the file's content in the metadata since we already saved it as a file.
             SaveMetadata(os.path.join(pageName, fileName), fileStuff)
-
-    # Wikidot has a limit on the size of a file which can be downloaded through the API which is much smaller than the filesize limit on the site.
-    # If any files failed to download, try to download then using Selenium
-    # This should get the file, but can't get the metadata.
-    if len(downloadFailures) > 0:
-        for fileName in downloadFailures:
-            url = f'https://{siteName}.wdfiles.com/local--files/{wikiName}/{urllib.parse.quote(fileName)}'
-            dst = os.path.join(pageName, fileName)
-            print(f"     downloading big file {url} to {dst}")
-            urllib.request.urlretrieve(url, os.path.join(pageName, fileName))
-            print("     downloaded big file "+fileName)
-
+            # Download the actual file
+            urllib.request.urlretrieve(fileStuff["download_url"], path)
 
     return True
 

@@ -16,7 +16,7 @@ It stops when it finds a page where the local copy is up-to-date
 The next time it is run, if any pages have been updated in the mean time, the massed pages won;t be noticed.
 Since the alternative is to check every page every time, and since this was written to deal with a wiki with >20K ages, it is an accepted issue to be dea;lt with by hand.)
 
-The next step is to compare the list of all local .txt files with the list of all pages, and to download any which are issing.
+The next step is to compare the list of all local .txt files with the list of all pages, and to download any which are missing.
 (Note that this does not deal with deleted .xml files or deleted attached files. This fairly cheap to check, so t might be a useful enhancement.)
 
 The final step is to look for local .txt files which are not on the wiki. These will typically be files which have been deleted on the wiki. They are deleted locally.
@@ -38,16 +38,6 @@ Then for the wikidot account, get the keys: My Account » Settings » API access
 Copy your read-only key.
 
 Create `apikey.txt` containing the wikidot api key.
-
-## Large file support
-
-wikidot API seems to have issues with large files.
-
-Downloader uses urllib to download them from the wdfiles url.
-
-It does not work for private sites: it just downloads an error message instead.
-
-TODO: proper error and/or fix for this case
 
 ## Run downloader
 
