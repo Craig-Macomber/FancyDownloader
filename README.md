@@ -9,12 +9,6 @@ Setup a venv: https://docs.python.org/3/tutorial/venv.html
 `python3 -m venv .venv`
 `source .venv/bin/activate`
 
-## Dependencies
-
-`python3 -m pip install selenium`
-
-Used version selenium-4.1.0-py3-none-any.whl
-
 ## Enable API access
 
 On the sites admin module, enable API access: see \_admin: Admin Panel » Security » API access
@@ -37,11 +31,13 @@ This file must not have a trailing line break.
 
 Set `siteName` and `siteUrl` in FancyDownloader.py
 
-## Create destination directory
+Files will be saved in `f'../{siteName}'`
 
-create `../site`
+## Large file support
 
-ex `mkdir ../site`
+wikidot API seems to have issues with large files.
+
+Downloader uses urllib to downlod them from the wdfiles url.
 
 ## Run downloader
 

@@ -31,9 +31,7 @@ import datetime
 import base64
 import time
 import urllib.request
-from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.support.ui import WebDriverWait
+import urllib.parse
 
 #-----------------------------------------
 # Configuration. Edit this section to select your wikidot site.
@@ -150,7 +148,7 @@ def DownloadPage(url, pageName, skipIfNotNewer):
             try:
                 fileStuff = client.ServerProxy(url).files.get_one({"site": siteName, "page": wikiName, "file": fileName})    # Download the file's content and metadata
             except client.Fault:
-                print("**** client.Fault loading "+fileName+". The file is probably too big.")
+                print("**** client.Fault loading "+fileName+". The file is probably too big. Will download via wdfiles.")
                 downloadFailures.append(fileName)
                 continue
             path=os.path.join(os.getcwd(), pageName, fileName)
@@ -166,27 +164,13 @@ def DownloadPage(url, pageName, skipIfNotNewer):
     # If any files failed to download, try to download then using Selenium
     # This should get the file, but can't get the metadata.
     if len(downloadFailures) > 0:
-        # Instantiate the web browser Selenium will use. For now, we're opening it anew each time.
-        browser=webdriver.Firefox()
-        # Open the Fancy 3 page in the browser
-        browser.get(siteUrl+"/"+pageName+"/noredirect/t")
-        elem=browser.find_element_by_id('files-button')
-        elem.send_keys(Keys.RETURN)
-        time.sleep(0.7)  # Just-in-case
-        # wait.until(EC.presence_of_element_located((By.CLASS_NAME, 'page-files')))
+        for fileName in downloadFailures:
+            url = f'https://{siteName}.wdfiles.com/local--files/{wikiName}/{urllib.parse.quote(fileName)}'
+            dst = os.path.join(pageName, fileName)
+            print(f"     downloading big file {url} to {dst}")
+            urllib.request.urlretrieve(url, os.path.join(pageName, fileName))
+            print("     downloaded big file "+fileName)
 
-        try:
-            els=browser.find_element_by_class_name("page-files").find_elements_by_tag_name("tr")
-        except:
-            print('******find_element_by_class_name("page-files").find_elements_by_tag_name("tr") failed')
-
-        for i in range(1, len(els)):
-            h=els[i].get_attribute("outerHTML")
-            url, linktext=GetHrefAndTextFromString(h)
-            if linktext in downloadFailures:
-                urllib.request.urlretrieve(siteUrl+url, os.path.join(pageName, linktext))
-                print("     downloading big file "+linktext)
-        browser.close()
 
     return True
 
@@ -233,9 +217,10 @@ url=open("url.txt").read()
 
 # Change the working directory to the destination of the downloaded wiki
 cwd=os.getcwd()
-path=os.path.join(cwd, "../site")
+path=os.path.join(cwd, f"../{siteName}")
+os.makedirs(path, exist_ok=True)
 os.chdir(path)
-os.chmod(path, 0o777)
+# os.chmod(path, 0o777)
 del cwd, path
 
 # Look for a file called "override.txt" -- if it exists, load those pages and do nothing else.
