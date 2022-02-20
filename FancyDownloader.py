@@ -33,9 +33,15 @@ import time
 import urllib.request
 import urllib.parse
 
+
+import argparse
+parser = argparse.ArgumentParser()
+parser.add_argument('--site', help='name of wikidot site')
+args = parser.parse_args()
+
 #-----------------------------------------
 # Configuration. Edit this section to select your wikidot site.
-siteName = "craigm"
+siteName = args.site
 
 #-----------------------------------------
 # Find text bracketed by <b>...</b>
@@ -216,16 +222,17 @@ url = f"https://{siteName}:{apiKey}@www.wikidot.com/xml-rpc-api.php"
 
 # Change the working directory to the destination of the downloaded wiki
 cwd=os.getcwd()
-path=os.path.join(cwd, f"../{siteName}")
+path=os.path.join(cwd, f"../site/{siteName}")
 os.makedirs(path, exist_ok=True)
 os.chdir(path)
-# os.chmod(path, 0o777)
+print(f"saving site to {path}")
 del cwd, path
+
 
 # Look for a file called "override.txt" -- if it exists, load those pages and do nothing else.
 # Override.txt contains a list of page names, one name per line.
-if os.path.exists("../FancyDownloader/override.txt"):
-    with open("../FancyDownloader/override.txt", "r") as file:
+if os.path.exists("../../FancyDownloader/override.txt"):
+    with open("../../FancyDownloader/override.txt", "r") as file:
         override=file.readlines()
     override=[x.strip() for x in override]  # Remove trailing '\n'
     # Remove duplicates;

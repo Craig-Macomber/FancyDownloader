@@ -2,14 +2,7 @@
 
 Use / install newish python (I used 3.8.10)
 
-## Optional (Recommended): python virtual environment
-
-Setup a venv: https://docs.python.org/3/tutorial/venv.html
-
-`python3 -m venv .venv`
-`source .venv/bin/activate`
-
-## Enable API access
+## API access
 
 On the sites admin module, enable API access: see \_admin: Admin Panel » Security » API access
 
@@ -23,20 +16,17 @@ Copy your read-only key.
 
 Create `apikey.txt` containing the wikidot api key.
 
-## Setup other config
-
-Set `siteName` in FancyDownloader.py
-
-Files will be saved in `f'../{siteName}'`
-
 ## Large file support
 
 wikidot API seems to have issues with large files.
 
 Downloader uses urllib to downlod them from the wdfiles url.
 
-This may have issues with private sites/pages.
+It appears this this works for private sites, despite having no authentication:
+It seems like a security hole that files can be downloaded with a guessed URL, but it makes this script's job easier.
 
 ## Run downloader
 
-`python3 FancyDownloader.py`
+`python3 FancyDownloader.py --site your-wikidot-site-name`
+
+Files will be saved in `../site/your-wikidot-site-name`.
