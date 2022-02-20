@@ -43,10 +43,11 @@ Create `apikey.txt` containing the wikidot api key.
 
 wikidot API seems to have issues with large files.
 
-Downloader uses urllib to downlod them from the wdfiles url.
+Downloader uses urllib to download them from the wdfiles url.
 
-It appears this this works for private sites, despite having no authentication:
-It seems like a security hole that files can be downloaded with a guessed URL, but it makes this script's job easier.
+It does not work for private sites: it just downloads an error message instead.
+
+TODO: proper error and/or fix for this case
 
 ## Run downloader
 
