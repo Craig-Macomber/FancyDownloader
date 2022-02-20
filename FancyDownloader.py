@@ -35,10 +35,7 @@ import urllib.parse
 
 #-----------------------------------------
 # Configuration. Edit this section to select your wikidot site.
-siteName = "fancyclopedia"
-siteUrl = "http://fancyclopedia.org"
-
-
+siteName = "craigm"
 
 #-----------------------------------------
 # Find text bracketed by <b>...</b>
@@ -213,7 +210,9 @@ def GetPageWikiTime(localName, pageData):
 # Main
 
 # Get the magic URL for api access
-url=open("url.txt").read()
+apiKey=open("apikey.txt").read().strip()
+url = f"https://{siteName}:{apiKey}@www.wikidot.com/xml-rpc-api.php"
+
 
 # Change the working directory to the destination of the downloaded wiki
 cwd=os.getcwd()

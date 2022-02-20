@@ -21,15 +21,11 @@ Then for the wikidot account, get the keys: My Account » Settings » API access
 
 Copy your read-only key.
 
-create `url.txt`. It contains a single line of text of the form:
-`https://fancyclopedia:rdS...80g@www.wikidot.com/xml-rpc-api.php`
-where 'fancyclopedia' is the wiki and 'rdS...80g' is the access key
-
-This file must not have a trailing line break.
+Create `apikey.txt` containing the wikidot api key.
 
 ## Setup other config
 
-Set `siteName` and `siteUrl` in FancyDownloader.py
+Set `siteName` in FancyDownloader.py
 
 Files will be saved in `f'../{siteName}'`
 
@@ -38,6 +34,8 @@ Files will be saved in `f'../{siteName}'`
 wikidot API seems to have issues with large files.
 
 Downloader uses urllib to downlod them from the wdfiles url.
+
+This may have issues with private sites/pages.
 
 ## Run downloader
 
